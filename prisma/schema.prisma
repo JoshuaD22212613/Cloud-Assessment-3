@@ -1,0 +1,66 @@
+// use prisma-next
+
+enum ActivityType {
+  WORDLE
+  WORD_SEARCH
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model WordList {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  words       Word[]
+  activities  Activity[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Word {
+  id             Int        @id @default(autoincrement())
+  text           String
+  hint           String?
+  wordList       WordList   @relation(fields: [wordListId], references: [id], onDelete: Cascade)
+  wordListId     Int
+  phonemes       Phoneme[]
+  targetActivity Activity[] @relation("TargetWord")
+  createdAt      TimestamptzString @default(now())
+  updatedAt      temporal.updatedAtString()
+
+  @@index([wordListId])
+}
+
+model Phoneme {
+  id       Int    @id @default(autoincrement())
+  symbol   String
+  position Int
+  word     Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  wordId   Int
+
+  @@unique([wordId, position])
+  @@index([wordId])
+}
+
+model Activity {
+  id           Int          @id @default(autoincrement())
+  title        String
+  type         ActivityType
+  difficulty   Difficulty   @default(EASY)
+  showHints    Boolean      @default(true)
+  gridSize     Int?
+  maxGuesses   Int?
+  wordList     WordList     @relation(fields: [wordListId], references: [id])
+  wordListId   Int
+  targetWord   Word?        @relation("TargetWord", fields: [targetWordId], references: [id], onDelete: SetNull)
+  targetWordId Int?
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+
+  @@index([wordListId])
+  @@index([targetWordId])
+}
