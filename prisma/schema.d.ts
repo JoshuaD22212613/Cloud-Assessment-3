@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'13e426bf8f14410e456a1d7f0cdeb7473efd84072edcac96b6f69d7addd60a79'>;
+  StorageHashBase<'183b2cc2a1d589fd1c587b5a6c91e5e6a5e80ef5d3960d239faf7d3196a335a7'>;
 export type ExecutionHash =
   ExecutionHashBase<'8c231f3642e36d52fbaed49d2f6ad15378eb35bf8adfec871d59d5aa54e7846c'>;
 export type ProfileHash =
@@ -260,6 +260,16 @@ export type FieldOutputTypes = {
       readonly position: CodecTypes['pg/int4@1']['output'];
       readonly wordId: CodecTypes['pg/int4@1']['output'];
     };
+    readonly UsageEvent: {
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly eventType: 'GENERATION_SUCCESS' | 'GENERATION_FAILURE' | 'PAGE_VIEW';
+      readonly activityType: 'WORDLE' | 'WORD_SEARCH' | null;
+      readonly activityId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly page: CodecTypes['pg/text@1']['output'] | null;
+      readonly durationSeconds: CodecTypes['pg/int4@1']['output'] | null;
+      readonly errorMessage: CodecTypes['pg/text@1']['output'] | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+    };
     readonly Word: {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly text: CodecTypes['pg/text@1']['output'];
@@ -297,6 +307,16 @@ export type FieldInputTypes = {
       readonly symbol: CodecTypes['pg/text@1']['input'];
       readonly position: CodecTypes['pg/int4@1']['input'];
       readonly wordId: CodecTypes['pg/int4@1']['input'];
+    };
+    readonly UsageEvent: {
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly eventType: 'GENERATION_SUCCESS' | 'GENERATION_FAILURE' | 'PAGE_VIEW';
+      readonly activityType: 'WORDLE' | 'WORD_SEARCH' | null;
+      readonly activityId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly page: CodecTypes['pg/text@1']['input'] | null;
+      readonly durationSeconds: CodecTypes['pg/int4@1']['input'] | null;
+      readonly errorMessage: CodecTypes['pg/text@1']['input'] | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
     readonly Word: {
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -336,6 +356,16 @@ export type StorageColumnTypes = {
       readonly symbol: CodecTypes['pg/text@1']['output'];
       readonly wordId: CodecTypes['pg/int4@1']['output'];
     };
+    readonly usageEvent: {
+      readonly activityId: CodecTypes['pg/int4@1']['output'] | null;
+      readonly activityType: 'WORDLE' | 'WORD_SEARCH' | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
+      readonly durationSeconds: CodecTypes['pg/int4@1']['output'] | null;
+      readonly errorMessage: CodecTypes['pg/text@1']['output'] | null;
+      readonly eventType: 'GENERATION_SUCCESS' | 'GENERATION_FAILURE' | 'PAGE_VIEW';
+      readonly id: CodecTypes['pg/int4@1']['output'];
+      readonly page: CodecTypes['pg/text@1']['output'] | null;
+    };
     readonly word: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly hint: CodecTypes['pg/text@1']['output'] | null;
@@ -373,6 +403,16 @@ export type StorageColumnInputTypes = {
       readonly position: CodecTypes['pg/int4@1']['input'];
       readonly symbol: CodecTypes['pg/text@1']['input'];
       readonly wordId: CodecTypes['pg/int4@1']['input'];
+    };
+    readonly usageEvent: {
+      readonly activityId: CodecTypes['pg/int4@1']['input'] | null;
+      readonly activityType: 'WORDLE' | 'WORD_SEARCH' | null;
+      readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
+      readonly durationSeconds: CodecTypes['pg/int4@1']['input'] | null;
+      readonly errorMessage: CodecTypes['pg/text@1']['input'] | null;
+      readonly eventType: 'GENERATION_SUCCESS' | 'GENERATION_FAILURE' | 'PAGE_VIEW';
+      readonly id: CodecTypes['pg/int4@1']['input'];
+      readonly page: CodecTypes['pg/text@1']['input'] | null;
     };
     readonly word: {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
@@ -575,6 +615,78 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly usageEvent: {
+              columns: {
+                readonly id: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                };
+                readonly eventType: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                };
+                readonly activityType: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly activityId: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly page: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly durationSeconds: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                };
+                readonly errorMessage: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                };
+                readonly createdAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'usageEvent_eventType_idx_e4cf7742';
+                  readonly prefix: 'usageEvent_eventType_idx';
+                  readonly columns: readonly ['eventType'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'usageEvent_activityType_idx_ad11ed10';
+                  readonly prefix: 'usageEvent_activityType_idx';
+                  readonly columns: readonly ['activityType'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'usageEvent_createdAt_idx_9575dbd7';
+                  readonly prefix: 'usageEvent_createdAt_idx';
+                  readonly columns: readonly ['createdAt'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [];
+            };
             readonly word: {
               columns: {
                 readonly id: {
@@ -686,6 +798,10 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['EASY', 'MEDIUM', 'HARD'];
             };
+            readonly UsageEventType: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['GENERATION_SUCCESS', 'GENERATION_FAILURE', 'PAGE_VIEW'];
+            };
           };
         };
       };
@@ -701,6 +817,10 @@ type ContractBase = Omit<
     readonly word: { readonly namespace: 'public' & NamespaceId; readonly model: 'Word' };
     readonly phoneme: { readonly namespace: 'public' & NamespaceId; readonly model: 'Phoneme' };
     readonly activity: { readonly namespace: 'public' & NamespaceId; readonly model: 'Activity' };
+    readonly usageEvent: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'UsageEvent';
+    };
   };
   readonly domain: {
     readonly namespaces: {
@@ -835,6 +955,60 @@ type ContractBase = Omit<
                 readonly symbol: { readonly column: 'symbol' };
                 readonly position: { readonly column: 'position' };
                 readonly wordId: { readonly column: 'wordId' };
+              };
+            };
+          };
+          readonly UsageEvent: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly eventType: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly activityType: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly activityId: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly page: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly durationSeconds: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly errorMessage: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'usageEvent';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly eventType: { readonly column: 'eventType' };
+                readonly activityType: { readonly column: 'activityType' };
+                readonly activityId: { readonly column: 'activityId' };
+                readonly page: { readonly column: 'page' };
+                readonly durationSeconds: { readonly column: 'durationSeconds' };
+                readonly errorMessage: { readonly column: 'errorMessage' };
+                readonly createdAt: { readonly column: 'createdAt' };
               };
             };
           };
@@ -996,6 +1170,14 @@ type ContractBase = Omit<
               { readonly name: 'EASY'; readonly value: 'EASY' },
               { readonly name: 'MEDIUM'; readonly value: 'MEDIUM' },
               { readonly name: 'HARD'; readonly value: 'HARD' },
+            ];
+          };
+          readonly UsageEventType: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'GENERATION_SUCCESS'; readonly value: 'GENERATION_SUCCESS' },
+              { readonly name: 'GENERATION_FAILURE'; readonly value: 'GENERATION_FAILURE' },
+              { readonly name: 'PAGE_VIEW'; readonly value: 'PAGE_VIEW' },
             ];
           };
         };

@@ -11,6 +11,12 @@ enum Difficulty {
   HARD
 }
 
+enum UsageEventType {
+  GENERATION_SUCCESS
+  GENERATION_FAILURE
+  PAGE_VIEW
+}
+
 model WordList {
   id          Int        @id @default(autoincrement())
   name        String
@@ -63,4 +69,19 @@ model Activity {
 
   @@index([wordListId])
   @@index([targetWordId])
+}
+
+model UsageEvent {
+  id             Int            @id @default(autoincrement())
+  eventType      UsageEventType
+  activityType   ActivityType?
+  activityId     Int?
+  page           String?
+  durationSeconds Int?
+  errorMessage   String?
+  createdAt      TimestamptzString @default(now())
+
+  @@index([eventType])
+  @@index([activityType])
+  @@index([createdAt])
 }
