@@ -187,19 +187,29 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create the activity
-    const activity = await db.orm.public.Activity.create({
-      title,
-      type,
-      difficulty,
-      showHints,
-      gridSize,
-      maxGuesses,
-      wordListId,
-      targetWordId,
-    });
+// Create the activity
+const activity = await db.orm.public.Activity.create({
+  title,
+  type,
+  difficulty,
+  showHints,
+  gridSize,
+  maxGuesses,
+  wordListId,
+  targetWordId,
+});
 
-    return Response.json(activity, { status: 201 });
+// Record a successful activity generation event
+await db.orm.public.UsageEvent.create({
+  eventType: "GENERATION_SUCCESS",
+  activityType: type,
+  activityId: activity.id,
+  page: "/activities",
+  durationSeconds: null,
+  errorMessage: null,
+});
+
+return Response.json(activity, { status: 201 });
   } catch (error) {
     console.error("Failed to create activity:", error);
 
