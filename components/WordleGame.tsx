@@ -219,22 +219,22 @@ export default function WordleGame({
                     const status =
                       completedGuess?.statuses[columnIndex];
 
-                    return (
-                      <div
-                        key={columnIndex}
-                        className={`wordle-tile ${
-                          status ? `tile-${status}` : ""
-                        }`}
-                        aria-label={
-                          status
-                            ? `${completedSymbol}: ${status}`
-                            : currentSymbol ||
-                              "Empty phoneme tile"
-                        }
-                      >
-                        {completedSymbol || currentSymbol}
-                      </div>
-                    );
+                   return (
+  <div
+    key={columnIndex}
+    className={`wordle-tile ${
+      status ? `tile-${status}` : ""
+    }`}
+    role="img"
+    aria-label={
+      status
+        ? `${completedSymbol}: ${status}`
+        : currentSymbol || "Empty phoneme tile"
+    }
+  >
+    {completedSymbol || currentSymbol}
+  </div>
+);
                   })}
                 </div>
               );
