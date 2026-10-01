@@ -13,19 +13,20 @@ export default function AboutPage() {
       </section>
 
       <section className="info-card">
-        <h3>Assessment 2</h3>
+        <h3>Assessment 3</h3>
 
         <p>
-          Assessment 2 extends the Phoneme Activity Builder into a full-stack
-          web application. The application uses a PostgreSQL database and API
-          routes to manage word lists, words, phonemes and saved activity
-          configurations.
+          Assessment 3 extends the Phoneme Activity Builder with
+          data-driven reporting, application monitoring and automated
+          testing. The application uses PostgreSQL and API routes to
+          persist classroom data, saved activity configurations and
+          application usage events.
         </p>
 
         <p>
-          Teachers can create database-driven Wordle and Word Search activities,
-          manage stored classroom data, preview activities and download
-          standalone HTML files for classroom use.
+          Teachers can create database-driven Wordle and Word Search
+          activities, manage stored classroom data, preview activities
+          and download standalone HTML files for classroom use.
         </p>
       </section>
 
@@ -34,10 +35,11 @@ export default function AboutPage() {
           <h3>Phoneme Wordle</h3>
 
           <p>
-            The Wordle builder creates a Wordle-style classroom activity using
-            phoneme symbols instead of standard spelling. Teachers can select
-            words stored in the database, adjust difficulty and hint settings,
-            preview the activity and download it as a standalone HTML file.
+            The Wordle builder creates a Wordle-style classroom activity
+            using phoneme symbols instead of standard spelling. Teachers
+            can select words stored in the database, adjust difficulty
+            and hint settings, preview the activity and download it as a
+            standalone HTML file.
           </p>
         </section>
 
@@ -45,10 +47,11 @@ export default function AboutPage() {
           <h3>Phoneme Word Search</h3>
 
           <p>
-            The Word Search builder creates an interactive phoneme-based puzzle
-            using words stored in the database. Teachers can select a word list,
-            configure activity settings, preview the puzzle and download the
-            finished activity as a standalone HTML file.
+            The Word Search builder creates an interactive phoneme-based
+            puzzle using words stored in the database. Teachers can
+            select a word list, configure activity settings, preview the
+            puzzle and download the finished activity as a standalone
+            HTML file.
           </p>
         </section>
       </div>
@@ -58,9 +61,33 @@ export default function AboutPage() {
 
         <p>
           The Settings page allows word lists, words and saved activity
-          configurations to be created, viewed, edited and deleted. Each word
-          stores an ordered sequence of phonemes, including multi-character
-          phoneme symbols.
+          configurations to be created, viewed, edited and deleted.
+          Each word stores an ordered sequence of phonemes used by the
+          activity builders.
+        </p>
+      </section>
+
+      <section className="info-card">
+        <h3>Reporting and Observability</h3>
+
+        <p>
+          The dashboard provides database-driven reporting for saved
+          activities, successful and failed generations, average time
+          on page and activity usage. Application health and warning
+          indicators provide additional visibility into the state of
+          the system.
+        </p>
+      </section>
+
+      <section className="info-card">
+        <h3>Testing and Accessibility</h3>
+
+        <p>
+          The application is supported by Playwright end-to-end tests,
+          JMeter load testing and Lighthouse accessibility testing.
+          These tools are used to verify important user workflows,
+          observe application behaviour under increasing load and
+          identify accessibility improvements.
         </p>
       </section>
 
@@ -80,9 +107,9 @@ export default function AboutPage() {
         <h3>Website Walkthrough</h3>
 
         <p>
-          The video below demonstrates how to navigate the website, manage
-          database content, configure Wordle and Word Search activities,
-          preview the games and generate standalone HTML files.
+          The walkthrough demonstrates the application's activity
+          builders, database management, dashboard, reporting,
+          observability and testing features.
         </p>
 
         <div className="video-container">

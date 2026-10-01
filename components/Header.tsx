@@ -3,7 +3,7 @@ export default function Header() {
     <header className="site-header">
       <div className="header-content">
         <h1>Phoneme Activity Builder</h1>
-        <p>Cloud Web Applications — Assessment 2</p>
+        <p>Cloud Web Applications — Assessment 3</p>
       </div>
     </header>
   );
