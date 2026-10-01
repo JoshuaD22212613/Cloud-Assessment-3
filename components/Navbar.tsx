@@ -11,41 +11,78 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="navbar" aria-label="Main navigation">
+    <nav
+      className="navbar"
+      aria-label="Main navigation"
+    >
       <div className="nav-content">
         <div className="main-nav-links">
-          <Link href="/" onClick={closeMenu}>
+          <Link
+            href="/"
+            onClick={closeMenu}
+          >
             Home
           </Link>
 
-          <Link href="/wordle" onClick={closeMenu}>
+          <Link
+            href="/wordle"
+            onClick={closeMenu}
+          >
             Wordle
           </Link>
 
-          <Link href="/word-search" onClick={closeMenu}>
+          <Link
+            href="/word-search"
+            onClick={closeMenu}
+          >
             Word Search
+          </Link>
+
+          <Link
+            href="/dashboard"
+            onClick={closeMenu}
+          >
+            Dashboard
           </Link>
         </div>
 
         <button
           type="button"
           className="menu-button"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() =>
+            setMenuOpen(!menuOpen)
+          }
           aria-expanded={menuOpen}
           aria-controls="compact-menu"
-          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={
+            menuOpen
+              ? "Close navigation menu"
+              : "Open navigation menu"
+          }
         >
-          <span aria-hidden="true">☰</span>
+          <span aria-hidden="true">
+            ☰
+          </span>
+
           <span>Menu</span>
         </button>
 
         {menuOpen && (
-          <div id="compact-menu" className="compact-menu">
-            <Link href="/about" onClick={closeMenu}>
+          <div
+            id="compact-menu"
+            className="compact-menu"
+          >
+            <Link
+              href="/about"
+              onClick={closeMenu}
+            >
               About
             </Link>
 
-            <Link href="/settings" onClick={closeMenu}>
+            <Link
+              href="/settings"
+              onClick={closeMenu}
+            >
               Settings
             </Link>
           </div>
