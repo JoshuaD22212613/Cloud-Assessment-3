@@ -199,15 +199,7 @@ const activity = await db.orm.public.Activity.create({
   targetWordId,
 });
 
-// Record a successful activity generation event
-await db.orm.public.UsageEvent.create({
-  eventType: "GENERATION_SUCCESS",
-  activityType: type,
-  activityId: activity.id,
-  page: "/activities",
-  durationSeconds: null,
-  errorMessage: null,
-});
+
 
 return Response.json(activity, { status: 201 });
   } catch (error) {

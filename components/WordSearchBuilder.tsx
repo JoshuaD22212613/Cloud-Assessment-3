@@ -172,6 +172,7 @@ export default function WordSearchBuilder() {
       setSaveError(
         "Please enter an activity title."
       );
+
       return;
     }
 
@@ -179,6 +180,7 @@ export default function WordSearchBuilder() {
       setSaveError(
         "Please select a word list."
       );
+
       return;
     }
 
@@ -186,6 +188,7 @@ export default function WordSearchBuilder() {
       setSaveError(
         "The selected word list must contain at least one word."
       );
+
       return;
     }
 
@@ -268,88 +271,172 @@ export default function WordSearchBuilder() {
     }
   }
 
-  function downloadHtml() {
-    if (!selectedWordListId) {
-      setError(
-        "Please select a stored word list before generating the activity."
+  async function recordGenerationEvent(
+    eventType:
+      | "GENERATION_SUCCESS"
+      | "GENERATION_FAILURE",
+    errorMessage: string | null = null
+  ) {
+    try {
+      const response = await fetch(
+        "/api/usage-events",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            eventType,
+            activityType:
+              "WORD_SEARCH",
+            activityId: null,
+            page: "/word-search",
+            durationSeconds: null,
+            errorMessage,
+          }),
+        }
       );
+
+      if (!response.ok) {
+        console.error(
+          "Failed to record Word Search generation event."
+        );
+      }
+    } catch (trackingError) {
+      console.error(
+        "Failed to record Word Search generation event:",
+        trackingError
+      );
+    }
+  }
+
+  async function downloadHtml() {
+    setError("");
+
+    if (!selectedWordListId) {
+      const message =
+        "Please select a stored word list before generating the activity.";
+
+      setError(message);
+
+      await recordGenerationEvent(
+        "GENERATION_FAILURE",
+        message
+      );
+
       return;
     }
 
     if (selectedWords.length === 0) {
-      setError(
-        "The selected word list does not contain any words."
+      const message =
+        "The selected word list does not contain any words.";
+
+      setError(message);
+
+      await recordGenerationEvent(
+        "GENERATION_FAILURE",
+        message
       );
+
       return;
     }
 
-    const html =
-  generateWordSearchHtml({
-    title:
-      activityTitle ||
-      "Phoneme Word Search",
+    try {
+      const html =
+        generateWordSearchHtml({
+          title:
+            activityTitle ||
+            "Phoneme Word Search",
 
-    difficulty,
-    showHints,
+          difficulty,
+          showHints,
 
-    words: selectedWords.map(
-      (word) => ({
-        id: word.id,
-        english: word.text,
-        hint: word.hint,
+          words: selectedWords.map(
+            (word) => ({
+              id: word.id,
+              english: word.text,
+              hint: word.hint,
 
-        phonemes: word.phonemes
-          .slice()
-          .sort(
-            (a, b) =>
-              a.position -
-              b.position
-          )
-          .map(
-            (phoneme) =>
-              phoneme.symbol
+              phonemes:
+                word.phonemes
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      a.position -
+                      b.position
+                  )
+                  .map(
+                    (phoneme) =>
+                      phoneme.symbol
+                  ),
+            })
           ),
-      })
-    ),
-  });
+        });
 
-    const blob =
-      new Blob(
-        [html],
-        {
-          type:
-            "text/html;charset=utf-8",
-        }
+      const blob =
+        new Blob(
+          [html],
+          {
+            type:
+              "text/html;charset=utf-8",
+          }
+        );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.href = url;
+
+      link.download =
+        "phoneme-word-search.html";
+
+      document.body.appendChild(
+        link
       );
 
-    const url =
-      URL.createObjectURL(
-        blob
+      link.click();
+
+      document.body.removeChild(
+        link
       );
 
-    const link =
-      document.createElement(
-        "a"
+      URL.revokeObjectURL(
+        url
       );
 
-    link.href = url;
+      await recordGenerationEvent(
+        "GENERATION_SUCCESS"
+      );
+    } catch (generationError) {
+      console.error(
+        "Failed to generate Word Search activity:",
+        generationError
+      );
 
-    link.download =
-      "phoneme-word-search.html";
+      const message =
+        generationError instanceof Error
+          ? generationError.message
+          : "Unable to generate the Word Search activity.";
 
-    document.body.appendChild(
-      link
-    );
+      setError(
+        "Unable to generate the Word Search activity."
+      );
 
-    link.click();
-
-    document.body.removeChild(
-      link
-    );
-
-    URL.revokeObjectURL(
-      url
-    );
+      await recordGenerationEvent(
+        "GENERATION_FAILURE",
+        message
+      );
+    }
   }
 
   return (
@@ -542,9 +629,7 @@ export default function WordSearchBuilder() {
                     {selectedWords
                       .map(
                         (word) =>
-                          `${
-                            word.text
-                          }: /${word.phonemes
+                          `${word.text}: /${word.phonemes
                             .slice()
                             .sort(
                               (

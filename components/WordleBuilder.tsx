@@ -125,22 +125,22 @@ export default function WordleBuilder() {
     words.find((word) => word.id === selectedWordId) ?? null;
 
   // Keep the target phoneme array stable between renders.
-const targetPhonemes = useMemo(
-  () =>
-    selectedWord
-      ? selectedWord.phonemes
-          .slice()
-          .sort(
-            (a, b) =>
-              a.position - b.position
-          )
-          .map(
-            (phoneme) =>
-              phoneme.symbol
-          )
-      : [],
-  [selectedWord]
-);
+  const targetPhonemes = useMemo(
+    () =>
+      selectedWord
+        ? selectedWord.phonemes
+            .slice()
+            .sort(
+              (a, b) =>
+                a.position - b.position
+            )
+            .map(
+              (phoneme) =>
+                phoneme.symbol
+            )
+        : [],
+    [selectedWord]
+  );
 
   function handleWordListChange(wordListId: number) {
     setSelectedWordListId(wordListId);
@@ -233,39 +233,106 @@ const targetPhonemes = useMemo(
     }
   }
 
-function downloadHtml() {
-  if (!selectedWord) {
-    setError(
-      "Please select a stored word before generating the activity."
-    );
-    return;
+  async function recordGenerationEvent(
+    eventType: "GENERATION_SUCCESS" | "GENERATION_FAILURE",
+    errorMessage: string | null = null
+  ) {
+    try {
+      const response = await fetch("/api/usage-events", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          eventType,
+          activityType: "WORDLE",
+          activityId: null,
+          page: "/wordle",
+          durationSeconds: null,
+          errorMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(
+          "Failed to record Wordle generation event."
+        );
+      }
+    } catch (trackingError) {
+      console.error(
+        "Failed to record Wordle generation event:",
+        trackingError
+      );
+    }
   }
 
-  const html = generateWordleHtml({
-    title: activityTitle || "Phoneme Wordle",
-    difficulty,
-    showHints,
-    targetWord: targetPhonemes,
-    englishWord: selectedWord.text,
-    hint: selectedWord.hint,
-  });
+  async function downloadHtml() {
+    setError("");
 
-    const blob = new Blob([html], {
-      type: "text/html;charset=utf-8",
-    });
+    if (!selectedWord) {
+      const message =
+        "Please select a stored word before generating the activity.";
 
-    const url = URL.createObjectURL(blob);
+      setError(message);
 
-    const link = document.createElement("a");
+      await recordGenerationEvent(
+        "GENERATION_FAILURE",
+        message
+      );
 
-    link.href = url;
-    link.download = "phoneme-wordle.html";
+      return;
+    }
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      const html = generateWordleHtml({
+        title: activityTitle || "Phoneme Wordle",
+        difficulty,
+        showHints,
+        targetWord: targetPhonemes,
+        englishWord: selectedWord.text,
+        hint: selectedWord.hint,
+      });
 
-    URL.revokeObjectURL(url);
+      const blob = new Blob([html], {
+        type: "text/html;charset=utf-8",
+      });
+
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "phoneme-wordle.html";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+
+      await recordGenerationEvent(
+        "GENERATION_SUCCESS"
+      );
+    } catch (generationError) {
+      console.error(
+        "Failed to generate Wordle activity:",
+        generationError
+      );
+
+      const message =
+        generationError instanceof Error
+          ? generationError.message
+          : "Unable to generate the Wordle activity.";
+
+      setError(
+        "Unable to generate the Wordle activity."
+      );
+
+      await recordGenerationEvent(
+        "GENERATION_FAILURE",
+        message
+      );
+    }
   }
 
   return (
@@ -352,6 +419,7 @@ function downloadHtml() {
               setSelectedWordId(
                 Number(event.target.value)
               );
+
               setSaveMessage("");
               setSaveError("");
             }}
@@ -392,6 +460,7 @@ function downloadHtml() {
               setDifficulty(
                 event.target.value as Difficulty
               );
+
               setSaveMessage("");
               setSaveError("");
             }}
