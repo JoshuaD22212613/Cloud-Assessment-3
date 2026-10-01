@@ -15,9 +15,18 @@ type Metrics = {
     | "NONE";
 };
 
+type Health = {
+  status: string;
+  message: string;
+  timestamp: string;
+};
+
 export default function DashboardMetrics() {
   const [metrics, setMetrics] =
     useState<Metrics | null>(null);
+
+  const [health, setHealth] =
+    useState<Health | null>(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -26,31 +35,47 @@ export default function DashboardMetrics() {
     useState("");
 
   useEffect(() => {
-    async function loadMetrics() {
+    async function loadDashboardData() {
       try {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-          "/api/metrics",
-          {
+        const [
+          metricsResponse,
+          healthResponse,
+        ] = await Promise.all([
+          fetch("/api/metrics", {
             cache: "no-store",
-          }
-        );
+          }),
 
-        if (!response.ok) {
+          fetch("/health", {
+            cache: "no-store",
+          }),
+        ]);
+
+        if (!metricsResponse.ok) {
           throw new Error(
             "Failed to load dashboard metrics."
           );
         }
 
-        const data: Metrics =
-          await response.json();
+        if (!healthResponse.ok) {
+          throw new Error(
+            "Application health check failed."
+          );
+        }
 
-        setMetrics(data);
+        const metricsData: Metrics =
+          await metricsResponse.json();
+
+        const healthData: Health =
+          await healthResponse.json();
+
+        setMetrics(metricsData);
+        setHealth(healthData);
       } catch (error) {
         console.error(
-          "Failed to load dashboard metrics:",
+          "Failed to load dashboard data:",
           error
         );
 
@@ -62,7 +87,7 @@ export default function DashboardMetrics() {
       }
     }
 
-    loadMetrics();
+    loadDashboardData();
   }, []);
 
   function formatActivityType(
@@ -84,34 +109,137 @@ export default function DashboardMetrics() {
     return "No usage yet";
   }
 
+  function formatHealthTime(
+    timestamp: string
+  ) {
+    const date = new Date(timestamp);
+
+    if (Number.isNaN(date.getTime())) {
+      return "Unknown";
+    }
+
+    return date.toLocaleString();
+  }
+
   if (loading) {
     return (
       <section className="info-card">
         <h3>Loading dashboard...</h3>
 
         <p>
-          Retrieving reporting and
-          usage metrics.
+          Retrieving reporting,
+          health and usage metrics.
         </p>
       </section>
     );
   }
 
-  if (error || !metrics) {
+  if (
+    error ||
+    !metrics ||
+    !health
+  ) {
     return (
       <section className="info-card">
-        <h3>Dashboard unavailable</h3>
+        <h3>
+          Dashboard unavailable
+        </h3>
 
         <p>
           {error ||
-            "Dashboard metrics could not be loaded."}
+            "Dashboard data could not be loaded."}
         </p>
       </section>
     );
   }
 
+  const applicationHealthy =
+    health.status === "OK";
+
+  const hasActivities =
+    metrics.totalActivities > 0;
+
+  const hasGenerationFailures =
+    metrics.failedGenerations > 0;
+
   return (
     <section>
+      <section className="info-card">
+        <p className="eyebrow">
+          System Status
+        </p>
+
+        <h3>
+          Application Monitoring
+        </h3>
+
+        <p>
+          Live application health and
+          data-quality indicators.
+        </p>
+
+        <div className="info-grid">
+          <article className="info-card">
+            <p className="eyebrow">
+              Application
+            </p>
+
+            <h3>
+              {applicationHealthy
+                ? "Healthy"
+                : "Warning"}
+            </h3>
+
+            <p>
+              {health.message}
+            </p>
+
+            <small>
+              Last health check:{" "}
+              {formatHealthTime(
+                health.timestamp
+              )}
+            </small>
+          </article>
+
+          <article className="info-card">
+            <p className="eyebrow">
+              Database Data
+            </p>
+
+            <h3>
+              {hasActivities
+                ? "Available"
+                : "Warning"}
+            </h3>
+
+            <p>
+              {hasActivities
+                ? `${metrics.totalActivities} saved activity configurations are available.`
+                : "No saved activity configurations were found."}
+            </p>
+          </article>
+
+          <article className="info-card">
+            <p className="eyebrow">
+              Generation Status
+            </p>
+
+            <h3>
+              {hasGenerationFailures
+                ? "Attention Required"
+                : "No Failures"}
+            </h3>
+
+            <p>
+              {hasGenerationFailures
+                ? `${metrics.failedGenerations} failed generation attempt(s) have been recorded.`
+                : "No failed activity generations have been recorded."}
+            </p>
+          </article>
+        </div>
+      </section>
+
       <div className="info-grid">
         <article className="info-card">
           <p className="eyebrow">
